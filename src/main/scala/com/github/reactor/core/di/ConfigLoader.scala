@@ -1,10 +1,10 @@
-package com.github.reactor.core.di.util
+package com.github.reactor.core.di
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.github.reactor.core.di.ClassInfoHelper.getClass
 import com.github.reactor.core.di.User
 import com.github.reactor.core.di.annotations.ConfigurationProperty
-import com.github.reactor.core.di.util.ClassInfoHelper.getClass
 import org.slf4j.LoggerFactory
 import org.yaml.snakeyaml.Yaml
 

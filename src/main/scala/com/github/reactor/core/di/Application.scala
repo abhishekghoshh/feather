@@ -1,8 +1,7 @@
 package com.github.reactor.core.di
 
 import com.github.reactor.core.di.annotations.*
-import com.github.reactor.core.di.util.ClassInfoHelper.*
-import com.github.reactor.core.di.util.{ClassInfoHelper, ConfigLoader}
+import ClassInfoHelper.*
 import org.slf4j.LoggerFactory
 
 import java.lang.reflect.{Constructor, Field, Method, Parameter}

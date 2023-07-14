@@ -2,8 +2,7 @@ package com.github.reactor.core.di
 
 import com.github.reactor.core.di.Application.getClass
 import com.github.reactor.core.di.annotations.{Inject, PostConstruct, Value}
-import com.github.reactor.core.di.util.ClassInfoHelper.{getBeanNameFromComponentClass, getBeanNameFromInjectedParameter}
-import com.github.reactor.core.di.util.{ClassInfoHelper, ConfigLoader}
+import ClassInfoHelper.{getBeanNameFromComponentClass, getBeanNameFromInjectedParameter}
 import com.github.reactor.core.neo4j.repository.{Neo4jConnector, Neo4jRepository}
 import org.slf4j.LoggerFactory
 

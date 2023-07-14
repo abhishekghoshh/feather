@@ -1,4 +1,4 @@
-package com.github.reactor.core.di.util
+package com.github.reactor.core.di
 
 import com.github.reactor.core.di.annotations.{Bean, Component, Inject}
 import org.slf4j.LoggerFactory
