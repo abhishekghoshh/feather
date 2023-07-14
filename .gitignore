@@ -1,0 +1,13 @@
+logs
+target
+/.bsp
+/.idea
+/.idea_modules
+/.classpath
+/.project
+/.g8
+/.settings
+/project/project
+/project/target
+/RUNNING_PID
+/htmlReport/

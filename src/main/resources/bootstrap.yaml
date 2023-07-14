@@ -1,0 +1,11 @@
+application:
+  server:
+    port: 8080
+    name: YASKA
+    profiles: dev,rest
+  config:
+    name: Abhishek Ghosh
+    data:
+      user:
+        name: Abhishek Ghosh
+        age: 15
