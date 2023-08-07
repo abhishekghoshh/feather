@@ -1,5 +1,5 @@
-name         := """arc-reactor-scala"""
-organization := "com.github.ag"
+name         := """feather"""
+organization := "com.github.feather"
 version      := "1.0.0"
 
 lazy val root = (project in file("."))

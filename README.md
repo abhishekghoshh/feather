@@ -1,5 +1,5 @@
-# arc-reactor-scala
-Scala lightweight dependency injection framework
+# feather
+A light weight dependency framework written in scala
 
 ### Install required tools
 
