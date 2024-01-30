@@ -1,11 +1,10 @@
 package com.github.feather.di
 
-import com.github.feather.di.annotations.Inject
 import com.github.feather.di.ClassInfoHelper.*
 import com.github.feather.di.annotations.*
 import org.slf4j.LoggerFactory
 
-import java.lang.reflect.{Constructor, Field, Method, Parameter}
+import java.lang.reflect.{Field, Parameter}
 import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
 
