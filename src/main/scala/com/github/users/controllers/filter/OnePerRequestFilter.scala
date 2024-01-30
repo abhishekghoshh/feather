@@ -12,6 +12,7 @@ class OnePerRequestFilter extends DecoratingHttpServiceFunction:
 
   @throws[Exception]
   def serve(delegate: HttpService, ctx: ServiceRequestContext, req: HttpRequest): HttpResponse =
+    logger.info("transaction started in OnePerRequestFilter")
     MDC.setContextMap(buildContextMap(ctx))
     val startTime = System.currentTimeMillis
     var response = delegate.serve(ctx, req)

@@ -1,29 +1,29 @@
 package com.github.users
 
-import com.github.feather.di.Application
 import com.github.neo4j.repository.Neo4jRepository
 import com.github.users.controllers.UserController
 import com.github.users.controllers.filter.OnePerRequestFilter
 import com.github.users.repositories.neo4j.UserRepository
 import com.github.users.service.UserService
 import com.linecorp.armeria.scala.ExecutionContexts.sameThread
-import com.linecorp.armeria.server.{DecoratingHttpServiceFunction, Server}
+import com.linecorp.armeria.server.Server
 import com.typesafe.config.{Config, ConfigFactory}
 
 object Main:
 
   def main(args: Array[String]): Unit =
-    Application.build(this)
+    //    Application.build(this)
     implicit val ec: scala.concurrent.ExecutionContext = sameThread
     val server = Server
       .builder()
       .http(8080)
-      .decorator(requestFilter)
+      .decorator(new OnePerRequestFilter())
+      //      .decorator(new UserFilter())
       .annotatedService(userController)
+      .dependencyInjector()
       .build()
     server.start.join()
 
-  private def requestFilter: DecoratingHttpServiceFunction = new OnePerRequestFilter()
 
   private def userController: UserController =
     val config: Config = ConfigFactory.load()
