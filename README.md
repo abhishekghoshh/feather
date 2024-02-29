@@ -1,6 +1,9 @@
 # feather
 A light weight dependency framework written in scala
 
+#### resources
+- [Comparing Dependency Injection Frameworks: Spring, Guice, Dagger and Micronaut](https://medium.com/@AlexanderObregon/comparing-dependency-injection-frameworks-spring-guice-and-dagger-a614dccd5859)
+
 ### Install required tools
 
 You need to download and install sbt for this application to run.
