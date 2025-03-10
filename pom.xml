@@ -166,13 +166,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <keyname>0xF362E38F</keyname>
-                    <gpgArguments>
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
-                </configuration>
             </plugin>
         </plugins>
     </build>

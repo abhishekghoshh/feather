@@ -1,0 +1,74 @@
+name: copy
+on: workflow_dispatch
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
+          settings-path: ${{ github.workspace }}
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-
+      - name: Display Maven Settings
+        run: |
+          if [ -f "$HOME/.m2/settings.xml" ]; then
+            cat "$HOME/.m2/settings.xml"
+          else
+            echo "Maven settings file not found at $HOME/.m2/settings.xml"
+          fi
+      - name: Build with Maven
+        run: >
+          mvn
+          --show-version
+          --batch-mode
+          --no-transfer-progress
+          --activate-profiles release
+          --file pom.xml
+          --settings $GITHUB_WORKSPACE/settings.xml
+          clean
+          compile
+          test-compile
+      - name: Verify with Maven
+        run: >
+          mvn
+          --show-version
+          --batch-mode
+          --no-transfer-progress
+          --activate-profiles release
+          --file pom.xml
+          --settings $GITHUB_WORKSPACE/settings.xml
+          verify
+        env:
+          SIGN_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          SIGN_KEY_PASS: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+      - name: Publish package
+        run: >
+          mvn
+          --show-version
+          --batch-mode
+          --no-transfer-progress
+          --activate-profiles release
+          --file pom.xml
+          --settings $GITHUB_WORKSPACE/settings.xml
+          deploy
+          -DskipTests
+          -Dmaven.install.skip=true
+        env:
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+          SIGN_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          SIGN_KEY_PASS: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
