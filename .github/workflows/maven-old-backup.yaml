@@ -1,5 +1,7 @@
-name: Publish package to the Maven Central Repository
+name: Manual publish to Maven Central(Required fix)
+
 on: workflow_dispatch
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -15,13 +17,6 @@ jobs:
           server-password: MAVEN_PASSWORD
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
-      - name: Display Maven Settings
-        run: |
-          if [ -f "$HOME/.m2/settings.xml" ]; then
-            cat "$HOME/.m2/settings.xml"
-          else
-            echo "Maven settings file not found at $HOME/.m2/settings.xml"
-          fi
       - name: Publish package
         run: mvn --batch-mode clean deploy -DskipTests=true
         env:

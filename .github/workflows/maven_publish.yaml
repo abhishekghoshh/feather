@@ -1,5 +1,11 @@
-name: copy
-on: workflow_dispatch
+name: Automatic publish to Maven Central
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
 jobs:
   publish:
     name: Release to Maven Central
@@ -64,6 +70,3 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
-          SIGN_KEY: ${{ secrets.GPG_SIGNING_KEY }}
-          SIGN_KEY_PASS: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
