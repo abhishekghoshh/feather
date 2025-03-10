@@ -17,10 +17,6 @@ jobs:
           server-password: MAVEN_PASSWORD
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
-      - name: Set GPG_TTY
-        run: |
-          export GPG_TTY=$(tty)
-          echo "export GPG_TTY=$(tty)" >> $GITHUB_ENV
       - name: Display Maven Settings
         run: |
           if [ -f "$HOME/.m2/settings.xml" ]; then
