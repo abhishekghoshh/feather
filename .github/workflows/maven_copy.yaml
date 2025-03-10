@@ -2,6 +2,8 @@ name: copy
 on: workflow_dispatch
 jobs:
   publish:
+    name: Release to Maven Central
+    concurrency: release-v6
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,13 +24,6 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2-
-      - name: Display Maven Settings
-        run: |
-          if [ -f "$HOME/.m2/settings.xml" ]; then
-            cat "$HOME/.m2/settings.xml"
-          else
-            echo "Maven settings file not found at $HOME/.m2/settings.xml"
-          fi
       - name: Build with Maven
         run: >
           mvn
