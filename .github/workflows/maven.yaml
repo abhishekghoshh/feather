@@ -15,6 +15,13 @@ jobs:
           server-password: MAVEN_PASSWORD
 #      - name: Set version
 #        run: mvn versions:set -DnewVersion=${{ github.event.release.tag_name }}
+      - name: Display Maven Settings
+        run: |
+          if [ -f "$HOME/.m2/settings.xml" ]; then
+            cat "$HOME/.m2/settings.xml"
+          else
+            echo "Maven settings file not found at $HOME/.m2/settings.xml"
+          fi
       - name: Publish package
         run: mvn --batch-mode deploy
         env:
