@@ -70,3 +70,6 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+          SIGN_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          SIGN_KEY_PASS: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
