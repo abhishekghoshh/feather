@@ -154,7 +154,8 @@
                 <artifactId>sign-maven-plugin</artifactId>
                 <version>1.1.0</version>
             </plugin>
-            <!-- This plugin is not working in GitHub action, Uncomment this if you are building from local-->
+            <!-- This plugin is not working in GitHub action,
+            Uncomment this if you are building and releasing from local-->
 <!--            <plugin>-->
 <!--                <groupId>org.apache.maven.plugins</groupId>-->
 <!--                <artifactId>maven-gpg-plugin</artifactId>-->
