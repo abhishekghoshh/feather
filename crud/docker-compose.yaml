@@ -1,0 +1,58 @@
+services:
+  neo4j-crud:
+    container_name: neo4j-crud
+    image: abhishek1009/neo4j-crud:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    develop:
+      watch:
+        - action: rebuild
+          path: src
+    environment:
+      - APPLICATION_NAME=neo4j-crud
+      - APPLICATION_PORT=8080
+      - NEO4J_URL=bolt://db:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=neo4j-password
+      - NEO4J_DBNAME=neo4j
+      - NEO4J_MODEL_PACKAGE=io.github.abhishekghoshh.crud.model
+    ports:
+      - "8080:8080"
+    networks:
+      - neo4j-crud-network
+    depends_on:
+      - neo4j
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8080/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+  neo4j:
+    image: neo4j:5.26
+    container_name: neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j-data:/data
+    environment:
+      - NEO4J_AUTH=neo4j/neo4j-password
+      - NEO4J_dbms_memory_pagecache_size=1G
+      - NEO4J_dbms.memory.heap.initial_size=1G
+      - NEO4J_dbms_memory_heap_max__size=1G
+      - NEO4J_AUTH=neo4j/neo4j-password
+    networks:
+      - neo4j-crud-network
+
+
+volumes:
+  neo4j-data:
+    driver: local
+
+networks:
+  neo4j-crud-network:
+    driver: bridge

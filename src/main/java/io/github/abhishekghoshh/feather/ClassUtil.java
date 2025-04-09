@@ -16,6 +16,11 @@ import java.util.jar.JarFile;
 public class ClassUtil {
     static ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
+
+    public static List<Class<?>> allClasses(Class<?> clazz) throws Exception {
+        return allClasses(clazz.getPackageName());
+    }
+
     public static List<Class<?>> allClasses(String packageName) throws Exception {
         return allClasses(packageName, cls -> true);
     }
