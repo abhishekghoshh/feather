@@ -20,7 +20,7 @@ public class LoggingFilter implements DecoratingHttpServiceFunction {
     public HttpResponse serve(HttpService delegate, ServiceRequestContext ctx, HttpRequest req) throws Exception {
         Map<String, String> context = new HashMap<>();
         String uuid = UUID.randomUUID().toString();
-        context.put("uuid", uuid);
+        context.put("uid", uuid);
         context.put("method", ctx.method().name());
         context.put("uri", ctx.path());
         MDC.setContextMap(context);

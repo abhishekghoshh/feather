@@ -1,7 +1,11 @@
 package io.github.abhishekghoshh.crud.neo4j;
 
+import ac.simons.neo4j.migrations.core.Migrations;
+import ac.simons.neo4j.migrations.core.MigrationsConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.neo4j.driver.AuthTokens;
+import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Logging;
 import org.neo4j.ogm.config.Configuration;
 import org.neo4j.ogm.drivers.bolt.driver.BoltDriver;
@@ -20,6 +24,7 @@ public abstract class Neo4jConnector implements AutoCloseable {
     private final String password;
     private final String database;
     private final String packageName;
+    private boolean applyMigration = false;
 
 
     private BoltDriver driver;
@@ -34,9 +39,34 @@ public abstract class Neo4jConnector implements AutoCloseable {
         build();
     }
 
+    public Neo4jConnector applyMigrations() {
+        this.applyMigration = true;
+        return this;
+    }
+
+    private void startMigrations(String url, String username, String password, String database, String schemaDatabase) {
+        var graphDatabaseDriver = GraphDatabase.driver(url, AuthTokens.basic(username, password));
+        MigrationsConfig migrationConfig = MigrationsConfig.builder()
+                .withLocationsToScan("classpath:db/migrations")
+                .withDatabase(database)
+                .withSchemaDatabase(schemaDatabase)
+                .build();
+        var migrations = new Migrations(migrationConfig, graphDatabaseDriver);
+
+        migrations.apply(true).ifPresent(migrationVersion ->
+                logger.info("migration version {}", migrationVersion.getValue())
+        );
+    }
+
+    // Run after the bean has been created
     protected Neo4jConnector build() {
         this.driver = buildDriver(url, username, password, database);
         this.sessionFactory = buildSessionFactory(this.driver, packageName);
+        logger.debug("migrations flag: {}", this.applyMigration);
+        if (this.applyMigration) {
+            logger.debug("Applying neo4j migrations");
+            startMigrations(url, username, password, database, database);
+        }
         return this;
     }
 
@@ -61,7 +91,7 @@ public abstract class Neo4jConnector implements AutoCloseable {
         return this.sessionFactory.openSession();
     }
 
-    protected <R> R withTransaction(Function<Session, R> function) {
+    public <R> R withTransaction(Function<Session, R> function) {
         Session session = getSession();
         try (Transaction transaction = session.beginTransaction(Transaction.Type.READ_WRITE)) {
             R result = function.apply(session);
@@ -70,7 +100,7 @@ public abstract class Neo4jConnector implements AutoCloseable {
         }
     }
 
-    protected <R> R withSession(Function<Session, R> function) {
+    public <R> R withSession(Function<Session, R> function) {
         return function.apply(getSession());
     }
 

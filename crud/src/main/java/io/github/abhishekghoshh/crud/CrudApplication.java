@@ -2,9 +2,11 @@ package io.github.abhishekghoshh.crud;
 
 import com.linecorp.armeria.server.Server;
 import com.linecorp.armeria.server.ServerBuilder;
-import io.github.abhishekghoshh.crud.controller.HealthController;
-import io.github.abhishekghoshh.crud.controller.UserController;
+import com.linecorp.armeria.server.docs.DocService;
+import com.linecorp.armeria.server.file.FileService;
 import io.github.abhishekghoshh.crud.controller.filter.LoggingFilter;
+import io.github.abhishekghoshh.crud.controller.routes.HealthController;
+import io.github.abhishekghoshh.crud.controller.routes.UserController;
 import io.github.abhishekghoshh.crud.neo4j.Neo4jRepository;
 import io.github.abhishekghoshh.crud.repository.UserRepository;
 import io.github.abhishekghoshh.crud.service.UserService;
@@ -24,7 +26,15 @@ public class CrudApplication {
 
     static Server newServer(int port) {
         ServerBuilder sb = Server.builder();
+        DocService docService = DocService.builder()
+                .build();
+        FileService fileService = FileService.builder(ClassLoader.getSystemClassLoader(), "/static")
+                .autoIndex(true) // Optional: enables directory listing
+                .build();
+
         return sb.http(port)
+                .serviceUnder("/docs", docService)
+                .serviceUnder("/web", fileService)
                 .annotatedService(healthController())
                 .annotatedService(userController())
                 .decorator(new LoggingFilter())
@@ -42,7 +52,8 @@ public class CrudApplication {
                 "neo4j-password",
                 "neo4j",
                 "io.github.abhishekghoshh.crud.model"
-        );
+        ).applyMigrations()
+                .build();
         UserRepository userRepository = new UserRepository(neo4jRepository);
         UserService userService = new UserService(userRepository);
         return new UserController(userService);

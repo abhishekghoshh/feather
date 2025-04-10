@@ -21,7 +21,11 @@ public class Neo4jRepository extends Neo4jConnector implements AutoCloseable {
 
     public Neo4jRepository(String url, String username, String password, String database, String packageName) {
         super(url, username, password, database, packageName);
-        build();
+    }
+
+    public Neo4jRepository applyMigrations() {
+        super.applyMigrations();
+        return this;
     }
 
 
@@ -53,15 +57,24 @@ public class Neo4jRepository extends Neo4jConnector implements AutoCloseable {
         Optional<T> optionalNode = withSession(session ->
                 Optional.ofNullable(session.load(className, id))
         );
-        if (optionalNode.isEmpty()) throw new NodeNotFoundException("Entity not found " + id);
+        if (optionalNode.isEmpty())
+            throw new NodeNotFoundException("Entity " + className.getName() + " not found " + id);
         return optionalNode.get();
     }
 
-    public <T extends Neo4jNode> T update(T data) throws NodeNotFoundException {
+    public <T extends Neo4jNode> T updateById(T data) throws NodeNotFoundException {
         T existingData = findById((Class<T>) data.getClass(), data.getId());
         return withTransaction(session -> {
-            data.setLastUpdateTimeStamp(formattedDate(currentTime()));
             data.setCreationTimeStamp(existingData.getCreationTimeStamp());
+            data.setLastUpdateTimeStamp(formattedDate(currentTime()));
+            session.save(data);
+            return data;
+        });
+    }
+
+    public <T extends Neo4jNode> T update(T data) {
+        return withTransaction(session -> {
+            data.setLastUpdateTimeStamp(formattedDate(currentTime()));
             session.save(data);
             return data;
         });
@@ -110,9 +123,13 @@ public class Neo4jRepository extends Neo4jConnector implements AutoCloseable {
 
     public <T extends Neo4jNode> void deleteById(Class<T> className, long id) throws NodeNotFoundException {
         T data = findById(className, id);
+        delete(data);
+    }
+
+    public <T extends Neo4jNode> void delete(T data) {
         withTransaction(session -> {
             session.delete(data);
-            return null;
+            return true;
         });
     }
 

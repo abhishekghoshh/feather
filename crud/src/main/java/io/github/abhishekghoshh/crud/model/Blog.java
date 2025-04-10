@@ -1,10 +1,7 @@
 package io.github.abhishekghoshh.crud.model;
 
 import io.github.abhishekghoshh.crud.neo4j.node.Neo4jNode;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 @Getter
@@ -12,12 +9,15 @@ import org.neo4j.ogm.annotation.NodeEntity;
 @NodeEntity
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class Blog extends Neo4jNode {
 
     private String title;
     private String content;
+    private String imgUrl;
 
-    public Blog(Long id, String creationTimeStamp, String lastUpdateTimeStamp) {
-        super(id, creationTimeStamp, lastUpdateTimeStamp);
+    public void update(Blog blog) {
+        this.title = blog.title;
+        this.content = blog.content;
     }
 }
