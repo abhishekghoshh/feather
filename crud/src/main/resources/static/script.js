@@ -1,7 +1,370 @@
 $(document).ready(function(){
+  loadUsers()
+  attachAddUserHandler();
   M.AutoInit();
+  initiateModal()
 });
+function initiateModal(){
+    $('.modal').modal()
+    $("#view_blogs_nav_btn").on('click',function(event){
+            event.preventDefault();
+            changeModalState(true,false,false)
+    })
+    $("#blogs_form_nav_btn").on('click',function(event){
+        event.preventDefault();
+        changeModalState(false,true,false)
+    })
+    $("#user_update_form_nav_btn").on('click',function(event){
+        event.preventDefault();
+        changeModalState(false,false,true)
+    })
+}
 
+function changeModalState(flag1,flag2,flag3){
+    const userId = $("#add_update_blogs_form").data("userId");
+    loadUpdateAddUpdateSticky(userId,null)
+    if(flag1){
+        $("#view_blogs_nav_btn").parent().addClass("active");
+        $("#user_blogs_container").css("display", "block");
+    }else{
+        $("#view_blogs_nav_btn").parent().removeClass("active");
+        $("#user_blogs_container").css("display", "none");
+    }
+    if(flag2){
+        $("#blogs_form_nav_btn").parent().addClass("active");
+        $("#add_update_blogs_form").css("display", "block");
+    }else{
+        $("#blogs_form_nav_btn").parent().removeClass("active");
+        $("#add_update_blogs_form").css("display", "none");
+    }
+    if(flag3){
+        $("#user_update_form_nav_btn").parent().addClass("active");
+        $("#user_update_form").css("display", "block");
+    }else{
+        $("#user_update_form_nav_btn").parent().removeClass("active");
+        $("#user_update_form").css("display", "none");
+    }
+}
+
+
+function attachAddUserHandler(){
+    $("#new_user_submit").on('click',function(event){
+        event.preventDefault();
+        var name=$("#new_user_name").val();
+        var email=$("#new_user_email").val();
+        var age=$("#new_user_age").val();
+        var imgUrl=$("#new_user_image").val();
+        new RestCall()
+                    .url('/api/v1/users')
+                    .httpMethod("POST")
+                    .request({
+                        name: name,
+                        email: email,
+                        age: parseInt(age),
+                        imgUrl: imgUrl
+                    })
+                    .fireRestCall((parameters,statusCode,response,responseHeaders)=>{
+                        loadUsers()
+                        clearNewUserForm()
+                    },(parameters,statusCode,response,responseHeaders)=>{
+                        M.toast({html: response.message})
+                    })
+    })
+}
+function clearNewUserForm(){
+    $("#new_user_name").val("");
+    $("#new_user_email").val("");
+    $("#new_user_age").val("");
+    $("#new_user_image").val("");
+}
+
+
+function loadUsers(){
+    new RestCall()
+            .url('/api/v1/users')
+            .httpMethod("GET")
+            .fireRestCall((parameters,statusCode,response,responseHeaders)=>{
+                loadUsersList(response)
+            },(parameters,statusCode,response,responseHeaders)=>{
+                M.toast({html: response.message})
+            })
+}
+function loadUsersList(responseList) {
+    let html = "";
+    responseList.forEach(function(user) {
+        html += loadOneUserInformation(user)
+    });
+    $("#users_ul").html(html);
+}
+
+function loadOneUserInformation(user){
+    return `
+           <li class="collection-item avatar" >
+               <img src="${user.imgUrl || 'https://png.pngtree.com/png-clipart/20231019/original/pngtree-user-profile-avatar-png-image_13369988.png'}"
+               alt="" class="circle">
+               <span class="title">${user.name}</span>
+               <p>${user.email}</p>
+               <p>Age: <span>${user.age}</span></p>
+               <a id=${user.id} class="secondary-content waves-effect waves-light btn modal-trigger open_modal" onclick=openModal(${user.id})><i
+                       class="material-icons">open_in_new</i></a>
+           </li>
+    `;
+}
+
+function openModal(userId){
+    $('#blogs_modal').modal('open');
+    loadBlogs(userId);
+}
+
+function loadBlogs(userId){
+    changeModalState(true,false,false)
+    $("#blog_container").html("");
+    new RestCall()
+            .url('/api/v1/users/'+userId+'/blogs')
+            .httpMethod("GET")
+            .fireRestCall((parameters,statusCode,response,responseHeaders)=>{
+                loadModalContent(response)
+            },(parameters,statusCode,response,responseHeaders)=>{
+                M.toast({html: response.message})
+            })
+}
+
+function loadModalContent(response){
+    loadAllBlogs(response)
+    loadUpdateUserInformationForm(response)
+    loadUpdateAddUpdateSticky(response.id,null)
+}
+
+function loadUpdateAddUpdateSticky(userId,blog){
+    html = `
+        <div class="row">
+            <form class="col s12">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="insert_or_update_blog_name" type="text" class="validate" value="${blog ? blog.title : ''}" required>
+                        <label for="insert_or_update_blog_name" class="${blog ? 'active' : ''}">Title</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <textarea id="insert_or_update_blog_content" class="materialize-textarea" data-length="1200" required>${blog ? blog.content : ''}</textarea>
+                        <label for="insert_or_update_blog_content" class="${blog ? 'active' : ''}">Content</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="insert_or_update_blog_image" class="validate" type="text" value="${blog ? blog.imgUrl : 'https://materializecss.com/images/sample-1.jpg'}" required>
+                        <label for="insert_or_update_blog_image" class="active">Image link</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s4">
+                        <a class="waves-effect waves-light btn ${blog ? 'disabled' : ''}" onclick=callAddBlogForUser(${userId})><i class="material-icons left" >add</i>Add</a>
+                    </div>
+                    <div class="input-field col s4">
+                        <a class="waves-effect waves-light btn ${blog ? '' : 'disabled'}" onclick=callUpdateBlogForUser(${userId},${blog ? blog.id : -1})><i class="material-icons left" >update</i>Update</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    `
+    $("#add_update_blogs_form").html(html);
+    $("#add_update_blogs_form").data("userId", userId).html(html);
+}
+
+function callAddBlogForUser(userId){
+    var title=$("#insert_or_update_blog_name").val();
+    var content=$("#insert_or_update_blog_content").val();
+    var imgUrl=$("#insert_or_update_blog_image").val();
+    new RestCall()
+                .url('/api/v1/users/'+userId+'/blogs')
+                .httpMethod("POST")
+                .request({
+                    title: title,
+                    content: content,
+                    imgUrl: imgUrl
+                })
+                .fireRestCall((parameters,statusCode,response,responseHeaders)=>{
+                    loadBlogs(userId);
+                },(parameters,statusCode,response,responseHeaders)=>{
+                    M.toast({html: response.message})
+                })
+}
+
+function callUpdateBlogForUser(userId,blogId){
+    var title=$("#insert_or_update_blog_name").val();
+    var content=$("#insert_or_update_blog_content").val();
+    var imgUrl=$("#insert_or_update_blog_image").val();
+    console.log({
+                title: title,
+                content: content,
+                imgUrl: imgUrl
+            })
+    new RestCall()
+                .url('/api/v1/users/'+userId+'/blogs/'+blogId)
+                .httpMethod("PUT")
+                .request({
+                    title: title,
+                    content: content,
+                    imgUrl: imgUrl
+                })
+                .fireRestCall((parameters,statusCode,response,responseHeaders)=>{
+                    loadBlogs(userId);
+                },(parameters,statusCode,response,responseHeaders)=>{
+                    M.toast({html: response.message})
+                })
+}
+
+
+function loadAllBlogs(response){
+    innerHtml = ""
+    response.blogs.forEach(function(blog) {
+        innerHtml += loadOneBlog(response.id,blog);
+    })
+    fullHtml = `
+        <div class="row">
+            ${innerHtml}
+        </div>
+    `
+    $("#user_blogs_container").html(fullHtml);
+}
+function loadOneBlog(userId,blog){
+    console.log("image url is ${blog.imgUrl}")
+    console.log(blog)
+    return `
+        <div class="col s4 m4 l4">
+            <div class="card">
+                <div class="card-image waves-effect waves-block waves-light">
+                    <img class="activator"
+                         src="${blog.imgUrl || 'https://materializecss.com/images/sample-1.jpg'}"
+                         alt="">
+                </div>
+                <div class="card-content">
+                    <span class="card-title activator grey-text text-darken-4">${blog.title}<i
+                            class="material-icons right">more_vert</i></span>
+                    <p>${(blog.content || 'No description available.').substring(0, 20)}...</p>
+                </div>
+                <div class="card-reveal">
+                    <div style="display:block" id="card-content-view-${blog.id}">
+                        <span class="card-title grey-text text-darken-4">${blog.title}<i
+                                class="material-icons right">close</i></span>
+                        <p>${blog.content || 'No content available.'}</p>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <a class="waves-effect waves-light btn-small" onclick="editBlog(${userId},${blog.id},'${blog.title}','${blog.content}','${blog.imgUrl}')"><i
+                            class="material-icons left">edit</i></a>
+                    <a class="waves-effect waves-light btn-small" onclick="deleteBlog(${userId},${blog.id})"><i class="material-icons left">delete</i></a>
+                </div>
+            </div>
+        </div>
+        `
+}
+
+function editBlog(userId,blogId,blogTitle,blogContent,blogImgUrl){
+    changeModalState(false,true,false)
+    blog = {
+             id: blogId,
+             title: blogTitle,
+             content: blogContent,
+             imgUrl: blogImgUrl
+           }
+    loadUpdateAddUpdateSticky(userId,blog)
+}
+
+function deleteBlog(userId,blogId){
+    new RestCall()
+                .url('/api/v1/users/'+userId+'/blogs/'+blogId)
+                .httpMethod("DELETE")
+                .fireRestCall((parameters,statusCode,response,responseHeaders)=>{
+                    loadBlogs(userId);
+                },(parameters,statusCode,response,responseHeaders)=>{
+                    M.toast({html: response.message})
+                })
+}
+
+
+
+
+function loadUpdateUserInformationForm(user) {
+    const html = `
+    <div class="row">
+        <form class="col s12">
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="update_user_name" type="text" class="validate" required value="${user.name}">
+                    <label for="update_user_name" class="active">Name</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="update_user_email" type="email" class="validate" required value="${user.email}">
+                    <label for="update_user_email" class="active">Email</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="update_user_age" class="validate" type="number" required value="${user.age}">
+                    <label for="update_user_age" class="active">Age</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="update_user_image" class="validate" type="text" required value="${user.imgUrl}">
+                    <label for="update_user_image" class="active">Image link</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s3">
+                    <a class="waves-effect waves-light btn" onclick="updateUserInformation(${user.id})">
+                        <i class="material-icons left">update</i>Update
+                    </a>
+                </div>
+                <div class="input-field col s3">
+                    <a class="waves-effect waves-light btn" onclick="deleteUserInformation(${user.id})">
+                        <i class="material-icons left">delete</i>delete
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    `;
+    $("#user_update_form").html(html);
+}
+
+function updateUserInformation(userId){
+    const name = $("#update_user_name").val();
+    const email = $("#update_user_email").val();
+    const age = $("#update_user_age").val();
+    const imgUrl = $("#update_user_image").val();
+    new RestCall()
+                .url('/api/v1/users/'+userId)
+                .httpMethod("PUT")
+                .request({
+                    name: name,
+                    email: email,
+                    age: parseInt(age),
+                    imgUrl: imgUrl
+                })
+                .fireRestCall((parameters,statusCode,response,responseHeaders)=>{
+                    $('.modal').modal("close")
+                    loadUsers();
+                },(parameters,statusCode,response,responseHeaders)=>{
+                    M.toast({html: response.message})
+                })
+}
+
+function deleteUserInformation(userId){
+    new RestCall()
+        .url('/api/v1/users/'+userId)
+        .httpMethod("DELETE")
+        .fireRestCall((parameters,statusCode,response,responseHeaders)=>{
+            $('.modal').modal("close")
+            loadUsers();
+        },(parameters,statusCode,response,responseHeaders)=>{
+            M.toast({html: response.message})
+        })
+}
 
 
 class RestCall {
@@ -89,7 +452,6 @@ class RestCall {
     return jqXHR.responseHeaders;
   }
   performRestCall(requestEntity, actions,getResponseHeaders) {
-    console.log("I am here")
     if (!requestEntity.HTTP_METHOD || "GET" ==requestEntity.HTTP_METHOD) {
       $.ajax({
         url: requestEntity.URL,

@@ -19,5 +19,6 @@ public class Blog extends Neo4jNode {
     public void update(Blog blog) {
         this.title = blog.title;
         this.content = blog.content;
+        this.imgUrl = blog.imgUrl;
     }
 }
