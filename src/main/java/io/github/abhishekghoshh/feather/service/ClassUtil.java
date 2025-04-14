@@ -1,4 +1,4 @@
-package io.github.abhishekghoshh.feather;
+package io.github.abhishekghoshh.feather.service;
 
 import java.io.File;
 import java.io.IOException;

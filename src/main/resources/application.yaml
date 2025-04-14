@@ -1,0 +1,17 @@
+application:
+  name: CRUD
+  port: 8080
+  config:
+    profiles:
+      active: dev
+    others:
+      - path: "https://raw.githubusercontent.com/abhishekghoshh/crud/main/src/main/resources/application.yaml"
+        active: false
+      - path: "https://raw.githubusercontent.com/abhishekghoshh/crud/config"
+        active: false
+      - path: "/opt/data/application.yaml"
+        active: true
+      - path: "/opt/data"
+        active: true
+      - path: "classpath:config.yaml"
+        active: false

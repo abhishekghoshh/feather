@@ -1,5 +1,5 @@
 package io.github.abhishekghoshh.feather.annotation;
 
-public @interface Scan {
+public @interface EntryPoint {
     String[] packages() default {};
 }

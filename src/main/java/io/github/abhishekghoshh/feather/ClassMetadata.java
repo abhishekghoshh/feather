@@ -1,4 +1,5 @@
 package io.github.abhishekghoshh.feather;
 
-public class Context {
+public record ClassMetadata() {
 }
+
